@@ -1,4 +1,4 @@
-# Pilo
+  # Ozeo
 
 Ton OS personnel des finances — rapide à utiliser au quotidien, visuel, avec assez de feedback pour donner envie d'y revenir.
 
