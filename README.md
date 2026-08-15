@@ -1,4 +1,4 @@
-  # Ozeo
+# Ozeo
 
 Ton OS personnel des finances — rapide à utiliser au quotidien, visuel, avec assez de feedback pour donner envie d'y revenir.
 
@@ -107,7 +107,5 @@ Voir [.env.example](.env.example).
 - Créer le projet Supabase et exécuter les migrations SQL
 - Activer et configurer le provider Google OAuth dans Supabase Auth
 - Générer de vraies icônes PWA (le manifest utilise un SVG placeholder)
-- Remplacer les domaines `pilo.example.com` dans `app/robots.ts` / `app/sitemap.ts` par le domaine réel
+- Remplacer les domaines `ozeo.example.com` dans `app/robots.ts` / `app/sitemap.ts` par le domaine réel
 - Brancher Sentry / Vercel Analytics / Resend si besoin (non inclus dans ce MVP)
-
-# ozeo
