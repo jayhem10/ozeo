@@ -9,9 +9,9 @@ export default async function OnboardingPage() {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    // Clears any stale session cookie so proxy's optimistic check stops bouncing back here.
-    await supabase.auth.signOut();
-    redirect("/login");
+    // supabase.auth.signOut() can't write cookies from a Server Component;
+    // redirect through a Route Handler that actually clears the stale session.
+    redirect("/auth/clear-session?next=/login");
   }
 
   const profile = await getOrCreateProfile(supabase, user.id, user.email);
