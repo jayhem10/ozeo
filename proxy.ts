@@ -13,6 +13,7 @@ const PROTECTED_PREFIXES = [
   "/import",
   "/settings",
   "/onboarding",
+  "/aide",
 ];
 const AUTH_PATHS = ["/login"];
 

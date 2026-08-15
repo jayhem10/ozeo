@@ -12,7 +12,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login");
+  if (!user) {
+    // Clears any stale session cookie so proxy's optimistic check stops bouncing back here.
+    await supabase.auth.signOut();
+    redirect("/login");
+  }
 
   const profile = await getOrCreateProfile(supabase, user.id, user.email);
 

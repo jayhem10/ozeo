@@ -9,6 +9,7 @@ import {
   Upload,
   Settings,
   RefreshCcw,
+  HelpCircle,
   Menu,
 } from "lucide-react";
 
@@ -23,6 +24,7 @@ export const NAV_ITEMS = [
   { href: "/analytics", label: "Analyses", icon: BarChart3 },
   { href: "/import", label: "Import", icon: Upload },
   { href: "/settings", label: "Paramètres", icon: Settings },
+  { href: "/aide", label: "Aide", icon: HelpCircle },
 ] as const;
 
 // Bottom tab bar only fits a few items; the rest live behind the "Plus" drawer.
@@ -41,4 +43,5 @@ export const MOBILE_MORE_ITEMS = [
   NAV_ITEMS[7],
   NAV_ITEMS[8],
   NAV_ITEMS[9],
+  NAV_ITEMS[10],
 ] as const;
