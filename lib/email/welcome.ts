@@ -34,12 +34,29 @@ export async function maybeSendWelcomeEmail(
           </tr>
         </table>
         <h1 style="font-size:20px;margin:0 0 12px;">Bienvenue${firstName ? ` ${firstName}` : ""} 👋</h1>
-        <p style="font-size:14px;line-height:1.6;margin:0 0 16px;">
-          Ton compte est prêt. Ajoute ton premier compte bancaire, crée quelques catégories de budget,
-          et commence à suivre tes dépenses en quelques secondes.
+        <p style="font-size:14px;line-height:1.6;margin:0 0 20px;">
+          Ton compte est prêt. Ozeo t'aide à comprendre où part ton argent : dépenses, budgets,
+          objectifs d'épargne et insights automatiques, le tout en quelques secondes par jour.
         </p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;margin:0 0 24px;">
+          <tr>
+            <td style="padding:0 0 12px;font-size:14px;line-height:1.5;">
+              ⚡ <b>Ajout ultra-rapide</b> — enregistre une dépense plus vite qu'en ouvrant ton appli bancaire.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 0 12px;font-size:14px;line-height:1.5;">
+              🐷 <b>Budgets qui parlent</b> — sache à l'avance si tu vas dépasser, pas juste un total en fin de mois.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0;font-size:14px;line-height:1.5;">
+              🎯 <b>Objectifs d'épargne</b> — visualise ta progression mois après mois.
+            </td>
+          </tr>
+        </table>
         <a href="${SITE_URL}/dashboard" style="display:inline-block;padding:10px 20px;background:#0f172a;color:#fff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:600;">
-          Configurer mon compte
+          Ajouter ma première dépense →
         </a>
         <p style="font-size:12px;color:#94a3b8;margin:24px 0 0;">
           Tu recevras un récap de tes dépenses chaque semaine pour t'aider à garder le cap.
