@@ -46,7 +46,7 @@ export async function maybeSendWelcomeEmail(
           </tr>
           <tr>
             <td style="padding:0 0 12px;font-size:14px;line-height:1.5;">
-              🐷 <b>Budgets qui parlent</b> — sache à l'avance si tu vas dépasser, pas juste un total en fin de mois.
+              � <b>Budgets qui parlent</b> — sache à l'avance si tu vas dépasser, pas juste un total en fin de mois.
             </td>
           </tr>
           <tr>
