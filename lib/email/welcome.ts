@@ -29,7 +29,14 @@ export async function maybeSendWelcomeEmail(
       <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a;">
         <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
           <tr>
-            <td style="width:28px;height:28px;border-radius:8px;background:#6366f1;text-align:center;vertical-align:middle;font-size:14px;line-height:28px;">✨</td>
+            <td style="width:28px;height:28px;border-radius:8px;background:#6366f1;text-align:center;vertical-align:middle;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;">
+                <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/>
+                <path d="M20 2v4"/>
+                <path d="M22 4h-4"/>
+                <circle cx="4" cy="20" r="2"/>
+              </svg>
+            </td>
             <td style="padding-left:8px;font-size:15px;font-weight:700;color:#0f172a;letter-spacing:-0.01em;vertical-align:middle;">Ozeo</td>
           </tr>
         </table>
