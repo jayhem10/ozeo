@@ -71,7 +71,7 @@ export function OnboardingWizard() {
       <div className="space-y-5 rounded-2xl border bg-card p-6 shadow-sm">
         {step === "welcome" && (
           <div className="space-y-4 text-center">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-linear-to-br from-violet-300 to-violet-500 text-white">
               <Sparkles className="size-6" />
             </div>
             <h2 className="text-xl font-semibold">Bienvenue 👋</h2>

@@ -49,7 +49,7 @@ export default function LandingPage() {
     <div className="flex flex-1 flex-col">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <div className="flex size-8 items-center justify-center rounded-xl bg-linear-to-br from-violet-300 to-violet-500 text-white">
             <Sparkles className="size-4" />
           </div>
           <span className="font-semibold tracking-tight">Ozeo</span>

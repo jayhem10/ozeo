@@ -15,7 +15,7 @@ export function AppSidebar({ profile }: { profile: Profile | null }) {
   return (
     <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r bg-card/50 lg:flex">
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <div className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+        <div className="flex size-8 items-center justify-center rounded-xl bg-linear-to-br from-violet-300 to-violet-500 text-white">
           <Sparkles className="size-4" />
         </div>
         <span className="font-semibold tracking-tight">Ozeo</span>

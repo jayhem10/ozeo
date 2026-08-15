@@ -14,7 +14,7 @@ export default async function LoginPage({
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
       <div className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center gap-2 text-center">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-linear-to-br from-violet-300 to-violet-500 text-white">
             <Sparkles className="size-6" />
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">Bienvenue</h1>
