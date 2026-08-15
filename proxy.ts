@@ -26,7 +26,7 @@ async function updateSession(request: NextRequest) {
   const { response, isAuthenticated } = await getOptimisticSession(request);
 
   const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
-  const isAuthPath = AUTH_PATHS.some((p) => pathname.startsWith(p));
+  const isAuthPath = AUTH_PATHS.some((p) => pathname.startsWith(p)) || pathname === "/";
 
   if (isProtected && !isAuthenticated) {
     const redirectUrl = new URL("/login", request.url);
