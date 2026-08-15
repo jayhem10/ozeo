@@ -99,7 +99,15 @@ export default function LandingPage() {
       </main>
 
       <footer className="border-t py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} Ozeo
+        <p>© {new Date().getFullYear()} Ozeo</p>
+        <p className="mt-1 space-x-3">
+          <Link href="/cgu" className="underline underline-offset-4">
+            Conditions d&apos;utilisation
+          </Link>
+          <Link href="/confidentialite" className="underline underline-offset-4">
+            Politique de confidentialité
+          </Link>
+        </p>
       </footer>
     </div>
   );

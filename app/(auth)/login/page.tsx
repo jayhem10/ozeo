@@ -32,7 +32,15 @@ export default async function LoginPage({
             </p>
           )}
           <p className="text-center text-xs text-muted-foreground">
-            En continuant, tu acceptes nos conditions d&apos;utilisation.
+            En continuant, tu acceptes nos{" "}
+            <Link href="/cgu" className="underline underline-offset-4">
+              conditions d&apos;utilisation
+            </Link>{" "}
+            et notre{" "}
+            <Link href="/confidentialite" className="underline underline-offset-4">
+              politique de confidentialité
+            </Link>
+            .
           </p>
         </div>
 
