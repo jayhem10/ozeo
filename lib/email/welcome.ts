@@ -27,7 +27,12 @@ export async function maybeSendWelcomeEmail(
     const firstName = profile.full_name?.split(" ")[0];
     const html = `
       <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a;">
-        <p style="font-size:13px;color:#64748b;margin:0 0 4px;">Ozeo</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
+          <tr>
+            <td style="width:28px;height:28px;border-radius:8px;background:#6366f1;text-align:center;vertical-align:middle;font-size:14px;line-height:28px;">✨</td>
+            <td style="padding-left:8px;font-size:15px;font-weight:700;color:#0f172a;letter-spacing:-0.01em;vertical-align:middle;">Ozeo</td>
+          </tr>
+        </table>
         <h1 style="font-size:20px;margin:0 0 12px;">Bienvenue${firstName ? ` ${firstName}` : ""} 👋</h1>
         <p style="font-size:14px;line-height:1.6;margin:0 0 16px;">
           Ton compte est prêt. Ajoute ton premier compte bancaire, crée quelques catégories de budget,

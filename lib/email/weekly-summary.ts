@@ -124,7 +124,13 @@ export async function buildWeeklySummaryEmail(
 
   const html = `
     <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a;">
-      <p style="font-size:13px;color:#64748b;margin:0 0 4px;">Ozeo — récap de la semaine</p>
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 16px;">
+        <tr>
+          <td style="width:28px;height:28px;border-radius:8px;background:#6366f1;text-align:center;vertical-align:middle;font-size:14px;line-height:28px;">✨</td>
+          <td style="padding-left:8px;font-size:15px;font-weight:700;color:#0f172a;letter-spacing:-0.01em;vertical-align:middle;">Ozeo</td>
+          <td style="padding-left:8px;font-size:13px;color:#64748b;vertical-align:middle;">— récap de la semaine</td>
+        </tr>
+      </table>
       <h1 style="font-size:20px;margin:0 0 4px;">Salut${firstName ? ` ${firstName}` : ""} 👋</h1>
       <p style="font-size:13px;color:#64748b;margin:0 0 20px;">${periodLabel}</p>
       <div style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
