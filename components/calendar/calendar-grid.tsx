@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MoneyDisplay } from "@/components/shared/money-display";
-import { cn } from "@/lib/utils";
+import { capitalize, cn } from "@/lib/utils";
 import type { Account, Category, RecurringTransaction, Transaction } from "@/types/database";
 
 export interface CalendarDayData {
@@ -115,7 +115,7 @@ export function CalendarGrid({
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {selected && format(selected.date, "EEEE d MMMM yyyy", { locale: fr })}
+              {selected && capitalize(format(selected.date, "EEEE d MMMM yyyy", { locale: fr }))}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2">

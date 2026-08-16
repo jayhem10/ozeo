@@ -58,6 +58,8 @@ export interface Category {
   is_default: boolean;
   monthly_budget_cents: number | null;
   created_at: string;
+  // Computed from favorite_categories, not a column on this table.
+  is_favorite?: boolean;
 }
 
 export type GoalImpact = "contribution" | "withdrawal";

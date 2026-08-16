@@ -68,3 +68,29 @@ export async function deleteCategory(id: string): Promise<ActionResult> {
   revalidatePath("/budgets");
   return { success: true };
 }
+
+function revalidateCategoryConsumers() {
+  revalidatePath("/settings");
+  revalidatePath("/dashboard");
+  revalidatePath("/transactions");
+  revalidatePath("/budgets");
+  revalidatePath("/analytics");
+  revalidatePath("/calendar");
+  revalidatePath("/recurring");
+}
+
+export async function setCategoryFavorite(id: string, isFavorite: boolean): Promise<ActionResult> {
+  const { supabase, user } = await requireUser();
+
+  const { error } = isFavorite
+    ? await supabase.from("favorite_categories").upsert({ user_id: user.id, category_id: id })
+    : await supabase
+        .from("favorite_categories")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("category_id", id);
+
+  if (error) return { success: false, error: error.message };
+  revalidateCategoryConsumers();
+  return { success: true };
+}

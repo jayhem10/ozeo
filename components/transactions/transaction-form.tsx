@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { format } from "date-fns";
 import type { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,7 +135,10 @@ export function TransactionForm({
             <SelectContent>
               {filteredCategories.map((c) => (
                 <SelectItem key={c.id} value={c.id}>
-                  {c.name}
+                  <span className="flex items-center gap-1.5">
+                    {c.is_favorite && <Star className="size-3 fill-amber-400 text-amber-400" />}
+                    {c.name}
+                  </span>
                 </SelectItem>
               ))}
             </SelectContent>

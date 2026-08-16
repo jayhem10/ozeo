@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Monitor } from "lucide-react";
 import {
@@ -19,7 +20,13 @@ const OPTIONS = [
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const current = OPTIONS.find((o) => o.value === theme) ?? OPTIONS[2];
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  // Theme is only known to the browser (localStorage), so keep the default
+  // "system" icon until mounted to avoid a server/client mismatch.
+  const current = (mounted && OPTIONS.find((o) => o.value === theme)) || OPTIONS[2];
   const CurrentIcon = current.icon;
 
   return (

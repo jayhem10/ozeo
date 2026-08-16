@@ -7,6 +7,7 @@ import { getAccounts } from "@/lib/data/accounts";
 import { getCategories } from "@/lib/data/categories";
 import { PageHeader } from "@/components/shared/page-header";
 import { CalendarGrid, type CalendarDayData } from "@/components/calendar/calendar-grid";
+import { ExportCalendarButton } from "@/components/calendar/export-calendar-button";
 import type { Account, Category, RecurringTransaction, Transaction } from "@/types/database";
 
 export default async function CalendarPage({
@@ -65,7 +66,11 @@ export default async function CalendarPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <PageHeader title="Calendrier financier" description="Anticipe tes dépenses et revenus à venir." />
+      <PageHeader
+        title="Calendrier financier"
+        description="Anticipe tes dépenses et revenus à venir."
+        action={<ExportCalendarButton defaultFrom={iso(monthStart)} defaultTo={iso(monthEnd)} />}
+      />
       <CalendarGrid
         days={days}
         monthLabel={format(reference, "MMMM yyyy", { locale: fr })}

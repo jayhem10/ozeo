@@ -5,19 +5,73 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import type { z } from "zod";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Search, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { CategoryBadge } from "@/components/shared/category-badge";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { cn } from "@/lib/utils";
 import { categoryFormSchema, type CategoryFormValues } from "@/lib/validations/schemas";
-import { createCategory, deleteCategory } from "@/lib/actions/categories";
+import { createCategory, deleteCategory, setCategoryFavorite } from "@/lib/actions/categories";
 import type { Category } from "@/types/database";
+
+function FavoriteToggle({ category }: { category: Category }) {
+  const [pending, setPending] = useState(false);
+
+  async function toggle() {
+    setPending(true);
+    const result = await setCategoryFavorite(category.id, !category.is_favorite);
+    setPending(false);
+    if (!result.success) toast.error(result.error);
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      disabled={pending}
+      onClick={toggle}
+      aria-label={category.is_favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+    >
+      <Star className={cn("size-4", category.is_favorite && "fill-amber-400 text-amber-400")} />
+    </Button>
+  );
+}
+
+function CategoryRow({ category }: { category: Category }) {
+  return (
+    <div className="flex items-center justify-between">
+      <CategoryBadge category={category} />
+      <div className="flex items-center">
+        <FavoriteToggle category={category} />
+        {!category.is_default && (
+          <ConfirmDialog
+            trigger={
+              <Button variant="ghost" size="icon" aria-label="Supprimer">
+                <Trash2 className="size-4" />
+              </Button>
+            }
+            title="Supprimer cette catégorie ?"
+            tooltip="Supprimer la catégorie"
+            description="Les transactions existantes garderont leur historique mais perdront cette catégorie."
+            confirmLabel="Supprimer"
+            onConfirm={async () => {
+              const result = await deleteCategory(category.id);
+              if (result.success) toast.success("Catégorie supprimée");
+              else toast.error(result.error);
+            }}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function CategoryManager({ categories }: { categories: Category[] }) {
   const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const {
     register,
     handleSubmit,
@@ -41,7 +95,9 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
     }
   }
 
-  const custom = categories.filter((c) => !c.is_default);
+  const filtered = categories.filter((c) => c.name.toLowerCase().includes(search.trim().toLowerCase()));
+  const expense = filtered.filter((c) => c.type === "expense");
+  const income = filtered.filter((c) => c.type === "income");
 
   return (
     <div className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm">
@@ -89,39 +145,37 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
         </Dialog>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {categories
-          .filter((c) => c.is_default)
-          .map((c) => (
-            <CategoryBadge key={c.id} category={c} />
-          ))}
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Rechercher une catégorie…"
+          className="pl-8"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          aria-label="Rechercher une catégorie"
+        />
       </div>
 
-      {custom.length > 0 && (
-        <div className="space-y-1.5 border-t pt-3">
-          <p className="text-xs font-medium text-muted-foreground">Personnalisées</p>
-          {custom.map((c) => (
-            <div key={c.id} className="flex items-center justify-between">
-              <CategoryBadge category={c} />
-              <ConfirmDialog
-                trigger={
-                  <Button variant="ghost" size="icon" aria-label="Supprimer">
-                    <Trash2 className="size-4" />
-                  </Button>
-                }
-                title="Supprimer cette catégorie ?"
-                tooltip="Supprimer la catégorie"
-                description="Les transactions existantes garderont leur historique mais perdront cette catégorie."
-                confirmLabel="Supprimer"
-                onConfirm={async () => {
-                  const result = await deleteCategory(c.id);
-                  if (result.success) toast.success("Catégorie supprimée");
-                  else toast.error(result.error);
-                }}
-              />
-            </div>
+      {expense.length > 0 && (
+        <div className="space-y-1.5">
+          <p className="text-xs font-medium text-muted-foreground">Dépenses</p>
+          {expense.map((c) => (
+            <CategoryRow key={c.id} category={c} />
           ))}
         </div>
+      )}
+
+      {income.length > 0 && (
+        <div className="space-y-1.5 border-t pt-3">
+          <p className="text-xs font-medium text-muted-foreground">Revenus</p>
+          {income.map((c) => (
+            <CategoryRow key={c.id} category={c} />
+          ))}
+        </div>
+      )}
+
+      {expense.length === 0 && income.length === 0 && (
+        <p className="text-sm text-muted-foreground">Aucune catégorie trouvée.</p>
       )}
     </div>
   );

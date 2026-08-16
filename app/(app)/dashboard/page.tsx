@@ -2,7 +2,7 @@ import Link from "next/link";
 import { differenceInCalendarDays, format, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Flame, Plus, TrendingDown, TrendingUp, Wallet, PiggyBank } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { capitalize, cn } from "@/lib/utils";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getOrCreateProfile } from "@/lib/data/profile";
 import { getAccounts, getTotalBalance } from "@/lib/data/accounts";
@@ -139,7 +139,7 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-6xl space-y-8">
       <PageHeader
         title={`Bonjour${firstName ? `, ${firstName}` : ""} 👋`}
-        description={format(now, "EEEE d MMMM yyyy", { locale: fr })}
+        description={capitalize(format(now, "EEEE d MMMM yyyy", { locale: fr }))}
         action={
           <div
             className={cn(
