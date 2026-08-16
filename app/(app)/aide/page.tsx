@@ -56,7 +56,7 @@ const SECTIONS = [
     icon: Calendar,
     title: "Calendrier",
     description:
-      "Vue mensuelle combinant tes transactions passées et les échéances de dépenses récurrentes à venir, pour anticiper les jours à forte sortie d'argent.",
+      "Vue mensuelle combinant tes transactions passées et les échéances de dépenses récurrentes à venir, pour anticiper les jours à forte sortie d'argent. Le bouton « Exporter » génère un fichier Excel (.xlsx) de tes transactions sur le mois affiché ou sur une période personnalisée.",
   },
   {
     icon: BarChart3,
@@ -74,7 +74,7 @@ const SECTIONS = [
     icon: Settings,
     title: "Paramètres",
     description:
-      "Profil, devise, thème clair/sombre, gestion des catégories personnalisées, et suppression définitive du compte (zone de danger) si tu veux tout effacer.",
+      "Profil, devise, thème clair/sombre, gestion des catégories (recherche, regroupées par dépense/revenu). L'étoile permet de marquer des catégories favorites, qui remontent en priorité dans les listes de sélection. Suppression définitive du compte (zone de danger) si tu veux tout effacer.",
   },
 ];
 
