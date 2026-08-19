@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { z } from "zod";
 import { Loader2 } from "lucide-react";
@@ -18,12 +20,17 @@ import {
 import { useTheme } from "next-themes";
 import { profileFormSchema, type ProfileFormValues } from "@/lib/validations/schemas";
 import { updateProfile } from "@/lib/actions/profile";
-import type { Profile } from "@/types/database";
+import type { Account, Profile } from "@/types/database";
 
 const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "CAD"];
+const ALL_ACCOUNTS = "all";
 
-export function ProfileForm({ profile }: { profile: Profile }) {
+export function ProfileForm({ profile, accounts }: { profile: Profile; accounts: Account[] }) {
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
   const {
     register,
     handleSubmit,
@@ -38,13 +45,18 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       locale: profile.locale,
       timezone: profile.timezone,
       monthly_budget: profile.monthly_budget_cents ? profile.monthly_budget_cents / 100 : undefined,
+      default_account_id: profile.default_account_id,
     },
   });
 
   async function onSubmit(values: ProfileFormValues) {
     const result = await updateProfile(values);
-    if (result.success) toast.success("Profil mis à jour");
-    else toast.error(result.error);
+    if (result.success) {
+      toast.success("Profil mis à jour");
+      router.refresh();
+    } else {
+      toast.error(result.error);
+    }
   }
 
   return (
@@ -78,7 +90,8 @@ export function ProfileForm({ profile }: { profile: Profile }) {
 
       <div className="space-y-1.5">
         <Label>Thème</Label>
-        <Select value={theme} onValueChange={(v) => v && setTheme(v)}>
+        {/* Theme is only known to the browser (localStorage); keep "system" until mounted to avoid a hydration mismatch. */}
+        <Select value={mounted ? theme : "system"} onValueChange={(v) => v && setTheme(v)}>
           <SelectTrigger className="w-full">
             <SelectValue>
               {(v: string) => (v === "light" ? "Clair" : v === "dark" ? "Sombre" : "Système")}
@@ -93,6 +106,33 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       </div>
 
       {errors.currency && <p className="text-xs text-destructive">{errors.currency.message}</p>}
+
+      {accounts.length > 1 && (
+        <div className="space-y-1.5">
+          <Label>Compte affiché par défaut</Label>
+          <Select
+            value={watch("default_account_id") ?? ALL_ACCOUNTS}
+            onValueChange={(v) => v && setValue("default_account_id", v === ALL_ACCOUNTS ? null : v)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue>
+                {(v: string) => (v === ALL_ACCOUNTS ? "Tous les comptes" : accounts.find((a) => a.id === v)?.name)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL_ACCOUNTS}>Tous les comptes</SelectItem>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground">
+            Vue affichée par défaut sur le dashboard, le calendrier, les analyses et les budgets.
+          </p>
+        </div>
+      )}
 
       <div className="flex justify-end">
         <Button type="submit" disabled={isSubmitting}>

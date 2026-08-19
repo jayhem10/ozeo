@@ -61,14 +61,17 @@ export async function getTransactionsInRange(
   supabase: SupabaseClient,
   userId: string,
   from: string,
-  to: string
+  to: string,
+  accountId?: string
 ): Promise<Transaction[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from("transactions")
     .select("*")
     .eq("user_id", userId)
     .gte("transaction_date", from)
     .lte("transaction_date", to);
+  if (accountId) query = query.eq("account_id", accountId);
+  const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as Transaction[];
 }
@@ -76,12 +79,15 @@ export async function getTransactionsInRange(
 export async function getRecentTransactions(
   supabase: SupabaseClient,
   userId: string,
-  limit = 8
+  limit = 8,
+  accountId?: string
 ): Promise<(Transaction & { category: Category | null; account: Account })[]> {
-  const { data, error } = await supabase
+  let query = supabase
     .from("transactions")
     .select("*, category:categories(*), account:accounts(*)")
-    .eq("user_id", userId)
+    .eq("user_id", userId);
+  if (accountId) query = query.eq("account_id", accountId);
+  const { data, error } = await query
     .order("transaction_date", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(limit);

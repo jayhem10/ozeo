@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -11,6 +12,7 @@ import {
   type OnboardingValues,
 } from "@/lib/validations/schemas";
 import { toCents } from "@/lib/money";
+import { SELECTED_ACCOUNT_COOKIE } from "@/lib/data/account-filter";
 import type { ActionResult } from "@/lib/actions/transactions";
 
 async function requireUser() {
@@ -36,12 +38,18 @@ export async function updateProfile(values: ProfileFormValues): Promise<ActionRe
       locale: v.locale,
       timezone: v.timezone,
       monthly_budget_cents: v.monthly_budget != null ? toCents(v.monthly_budget) : null,
+      default_account_id: v.default_account_id || null,
     })
     .eq("id", user.id);
 
   if (error) return { success: false, error: error.message };
-  revalidatePath("/settings");
-  revalidatePath("/dashboard");
+
+  // Clear any header override so the newly saved default takes effect right away.
+  const store = await cookies();
+  store.delete(SELECTED_ACCOUNT_COOKIE);
+
+  // "layout" also refreshes the (app) layout that renders the header's account switcher.
+  revalidatePath("/dashboard", "layout");
   return { success: true };
 }
 
@@ -55,8 +63,8 @@ export async function completeOnboarding(values: OnboardingValues): Promise<Acti
     user_id: user.id,
     name: v.account_name,
     type: "checking",
-    initial_balance_cents: 0,
-    current_balance_cents: 0,
+    initial_balance_cents: toCents(v.initial_balance),
+    current_balance_cents: toCents(v.initial_balance),
     currency: v.currency,
     icon: "Wallet",
     color: "#6366f1",
@@ -89,5 +97,7 @@ export async function deleteOwnAccount(): Promise<ActionResult> {
 export async function signOut() {
   const supabase = await createSupabaseServerClient();
   await supabase.auth.signOut();
+  const store = await cookies();
+  store.delete(SELECTED_ACCOUNT_COOKIE);
   redirect("/login");
 }

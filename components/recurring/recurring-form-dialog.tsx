@@ -40,11 +40,22 @@ export function RecurringFormDialog({
   recurring?: RecurringTransaction;
 }) {
   const [open, setOpen] = useState(false);
+  const emptyDefaults: RecurringFormValues = {
+    name: "",
+    account_id: accounts[0]?.id ?? "",
+    category_id: null,
+    amount: undefined as unknown as number,
+    type: "expense",
+    frequency: "monthly",
+    next_occurrence: format(new Date(), "yyyy-MM-dd"),
+    active: true,
+  };
   const {
     register,
     handleSubmit,
     watch,
     setValue,
+    reset,
     formState: { errors, isSubmitting },
   } = useForm<z.input<typeof recurringFormSchema>, unknown, RecurringFormValues>({
     resolver: zodResolver(recurringFormSchema),
@@ -59,16 +70,7 @@ export function RecurringFormDialog({
           next_occurrence: recurring.next_occurrence,
           active: recurring.active,
         }
-      : {
-          name: "",
-          account_id: accounts[0]?.id ?? "",
-          category_id: null,
-          amount: undefined,
-          type: "expense",
-          frequency: "monthly",
-          next_occurrence: format(new Date(), "yyyy-MM-dd"),
-          active: true,
-        },
+      : emptyDefaults,
   });
 
   const type = watch("type");
@@ -81,13 +83,19 @@ export function RecurringFormDialog({
     if (result.success) {
       toast.success(recurring ? "Récurrence mise à jour" : "Récurrence créée");
       setOpen(false);
+      if (!recurring) reset(emptyDefaults);
     } else {
       toast.error(result.error);
     }
   }
 
+  function handleOpenChange(next: boolean) {
+    if (next && !recurring) reset(emptyDefaults);
+    setOpen(next);
+  }
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {recurring ? (
         <Tooltip>
           <TooltipTrigger

@@ -5,6 +5,8 @@ import { getTransactionsInRange } from "@/lib/data/transactions";
 import { getRecurringTransactions } from "@/lib/data/recurring";
 import { getAccounts } from "@/lib/data/accounts";
 import { getCategories } from "@/lib/data/categories";
+import { getProfile } from "@/lib/data/profile";
+import { getSelectedAccountId, resolveSelectedAccountId } from "@/lib/data/account-filter";
 import { PageHeader } from "@/components/shared/page-header";
 import { CalendarGrid, type CalendarDayData } from "@/components/calendar/calendar-grid";
 import { ExportCalendarButton } from "@/components/calendar/export-calendar-button";
@@ -30,11 +32,17 @@ export default async function CalendarPage({
 
   const iso = (d: Date) => format(d, "yyyy-MM-dd");
 
-  const [accounts, categories, transactions, recurring] = await Promise.all([
-    getAccounts(supabase, user.id),
+  const profile = await getProfile(supabase, user.id);
+  const accounts = await getAccounts(supabase, user.id);
+  const selectedAccountId = resolveSelectedAccountId(
+    await getSelectedAccountId(profile?.default_account_id),
+    accounts
+  );
+
+  const [categories, transactions, recurring] = await Promise.all([
     getCategories(supabase, user.id),
-    getTransactionsInRange(supabase, user.id, iso(gridStart), iso(gridEnd)),
-    getRecurringTransactions(supabase, user.id),
+    getTransactionsInRange(supabase, user.id, iso(gridStart), iso(gridEnd), selectedAccountId ?? undefined),
+    getRecurringTransactions(supabase, user.id, selectedAccountId ?? undefined),
   ]);
 
   const accountById = new Map<string, Account>(accounts.map((a) => [a.id, a]));

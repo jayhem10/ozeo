@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { AccountSwitcher } from "@/components/layout/account-switcher";
 import { QuickAddTransaction } from "@/components/transactions/quick-add-transaction";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -14,12 +15,14 @@ export function AppShell({
   accounts,
   categories,
   goals,
+  selectedAccountId,
   children,
 }: {
   profile: Profile | null;
   accounts: Account[];
   categories: Category[];
   goals: SavingsGoal[];
+  selectedAccountId: string | null;
   children: React.ReactNode;
 }) {
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -32,6 +35,7 @@ export function AppShell({
         <header className="flex h-16 items-center justify-between border-b px-4 sm:px-6 lg:justify-end">
           <span className="text-sm font-semibold lg:hidden">Ozeo</span>
           <div className="flex items-center gap-2">
+            <AccountSwitcher accounts={accounts} selectedAccountId={selectedAccountId} />
             <ThemeToggle />
             <Button onClick={() => setQuickAddOpen(true)} size="sm" className="hidden gap-1.5 sm:inline-flex">
               <Plus className="size-4" />

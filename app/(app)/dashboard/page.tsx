@@ -10,7 +10,8 @@ import { getCategories } from "@/lib/data/categories";
 import { getBudgets } from "@/lib/data/budgets";
 import { getRecentTransactions, getTransactionsInRange } from "@/lib/data/transactions";
 import { getSavingsGoals } from "@/lib/data/goals";
-import { getUpcomingRecurring } from "@/lib/data/recurring";
+import { getRecurringOccurrencesThrough } from "@/lib/data/recurring";
+import { getSelectedAccountId, resolveSelectedAccountId } from "@/lib/data/account-filter";
 import {
   computeBudgetProgress,
   computePeriodTotals,
@@ -46,22 +47,29 @@ export default async function DashboardPage() {
   const { start: prevStart, end: prevEnd } = getPreviousMonthRange(now);
   const iso = (d: Date) => format(d, "yyyy-MM-dd");
 
-  const [profile, accounts, categories, budgets, recent, currentMonthTx, previousMonthTx, goals, upcoming] =
-    await Promise.all([
-      getOrCreateProfile(supabase, user.id, user.email),
-      getAccounts(supabase, user.id),
-      getCategories(supabase, user.id),
-      getBudgets(supabase, user.id),
-      getRecentTransactions(supabase, user.id, 6),
-      getTransactionsInRange(supabase, user.id, iso(monthStart), iso(monthEnd)),
-      getTransactionsInRange(supabase, user.id, iso(prevStart), iso(prevEnd)),
-      getSavingsGoals(supabase, user.id),
-      getUpcomingRecurring(supabase, user.id, Math.max(1, differenceInCalendarDays(monthEnd, now))),
-    ]);
+  const profile = await getOrCreateProfile(supabase, user.id, user.email);
+  const accounts = await getAccounts(supabase, user.id);
+  const selectedAccountId = resolveSelectedAccountId(
+    await getSelectedAccountId(profile.default_account_id),
+    accounts
+  );
+
+  const [categories, budgets, recent, currentMonthTx, previousMonthTx, goals, upcoming] = await Promise.all([
+    getCategories(supabase, user.id),
+    getBudgets(supabase, user.id),
+    getRecentTransactions(supabase, user.id, 6, selectedAccountId ?? undefined),
+    getTransactionsInRange(supabase, user.id, iso(monthStart), iso(monthEnd), selectedAccountId ?? undefined),
+    getTransactionsInRange(supabase, user.id, iso(prevStart), iso(prevEnd), selectedAccountId ?? undefined),
+    getSavingsGoals(supabase, user.id),
+    getRecurringOccurrencesThrough(supabase, user.id, iso(monthEnd), selectedAccountId ?? undefined),
+  ]);
 
   const currency = profile?.currency ?? "EUR";
-  const totalBalance = await getTotalBalance(accounts);
+  const balanceAccounts = selectedAccountId ? accounts.filter((a) => a.id === selectedAccountId) : accounts;
+  const totalBalance = await getTotalBalance(balanceAccounts);
   const totals = computePeriodTotals(currentMonthTx);
+  // Derived from data already loaded above — no extra query needed.
+  const monthStartBalanceCents = totalBalance - totals.netCents;
   const monthProgress = Math.min(
     1,
     Math.max(0, (differenceInCalendarDays(now, monthStart) + 1) / (differenceInCalendarDays(monthEnd, monthStart) + 1))
@@ -76,13 +84,16 @@ export default async function DashboardPage() {
   const incomeChange = percentChange(totals.incomeCents, previousTotals.incomeCents);
   const savingsChange = totals.savingsRate - previousTotals.savingsRate;
 
+  // "Reste à vivre" only factors in recurring income/expenses still due this month —
+  // it intentionally ignores one-off transactions the user hasn't logged yet.
   const upcomingIncomeCents = upcoming
     .filter((r) => r.type === "income")
     .reduce((sum, r) => sum + r.amount_cents, 0);
   const upcomingExpenseCents = upcoming
     .filter((r) => r.type === "expense")
     .reduce((sum, r) => sum + r.amount_cents, 0);
-  const projectedEndOfMonthCents = totalBalance + upcomingIncomeCents - upcomingExpenseCents;
+  const hasRemainingRecurring = upcoming.length > 0;
+  const resteAVivreCents = totalBalance + upcomingIncomeCents - upcomingExpenseCents;
 
   const categorySlices: CategorySlice[] = categories
     .filter((c) => c.type === "expense")
@@ -96,7 +107,13 @@ export default async function DashboardPage() {
     .filter((c) => c.cents > 0)
     .sort((a, b) => b.cents - a.cents);
 
-  const last30Days = await getTransactionsInRange(supabase, user.id, iso(subDays(now, 29)), iso(now));
+  const last30Days = await getTransactionsInRange(
+    supabase,
+    user.id,
+    iso(subDays(now, 29)),
+    iso(now),
+    selectedAccountId ?? undefined
+  );
   const trendData: TrendPoint[] = Array.from({ length: 30 }).map((_, i) => {
     const day = subDays(now, 29 - i);
     const dayCents = last30Days
@@ -156,22 +173,54 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="rounded-2xl border bg-linear-to-br from-primary/10 via-card to-card p-6 shadow-sm">
-        <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
-          <Wallet className="size-4" />
-          Solde disponible
-        </div>
-        <MoneyDisplay cents={totalBalance} currency={currency} size="xl" className="mt-2" />
-        {!loggedToday && (
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl border bg-linear-to-br from-primary/10 via-card to-card p-6 shadow-sm">
+          <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+            <Wallet className="size-4" />
+            Solde{selectedAccountId && balanceAccounts[0] ? ` — ${balanceAccounts[0].name}` : ""}
+          </div>
+          <MoneyDisplay cents={totalBalance} currency={currency} size="xl" className="mt-2" />
           <p className="mt-3 text-sm text-muted-foreground">
-            {streak > 0
-              ? "Ajoute une transaction aujourd'hui pour garder ta série ! 🔥"
-              : "Ajoute ta première transaction du jour pour démarrer une série."}
+            {!loggedToday
+              ? streak > 0
+                ? "Ajoute une transaction aujourd'hui pour garder ta série ! 🔥"
+                : "Ajoute ta première transaction du jour pour démarrer une série."
+              : selectedAccountId
+                ? "Solde réel de ce compte, à jour."
+                : "Solde réel de tous tes comptes, à jour."}
           </p>
-        )}
+          <p className="mt-1 text-xs text-muted-foreground">
+            Solde au {format(monthStart, "d MMM", { locale: fr })} :{" "}
+            <MoneyDisplay
+              cents={monthStartBalanceCents}
+              currency={currency}
+              size="sm"
+              className={monthStartBalanceCents < 0 ? "text-red-600" : undefined}
+            />
+            {monthStartBalanceCents < 0 && " — tu as commencé le mois en découvert"}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-3 text-sm font-medium text-muted-foreground">
+            <Target className="size-4" />
+            Reste à vivre (ce mois)
+          </div>
+          <MoneyDisplay
+            cents={resteAVivreCents}
+            currency={currency}
+            size="xl"
+            className={cn("mt-2", resteAVivreCents < 0 ? "text-red-600" : undefined)}
+          />
+          <p className="mt-3 text-sm text-muted-foreground">
+            {hasRemainingRecurring
+              ? "Solde + revenus récurrents restants − dépenses récurrentes restantes d'ici la fin du mois."
+              : "Aucune récurrence en attente ce mois-ci : identique au solde pour l'instant."}
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard
           label="Dépenses du mois"
           value={<MoneyDisplay cents={totals.expenseCents} currency={currency} size="lg" />}
@@ -207,18 +256,6 @@ export default async function DashboardPage() {
             positive: savingsChange >= 0,
           }}
         />
-        <StatCard
-          label="Projection fin de mois"
-          value={
-            <MoneyDisplay
-              cents={projectedEndOfMonthCents}
-              currency={currency}
-              size="lg"
-              className={projectedEndOfMonthCents < 0 ? "text-red-600" : undefined}
-            />
-          }
-          icon={Target}
-        />
       </div>
 
       {monthlyBudgetCents > 0 && (
@@ -240,9 +277,9 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {upcoming.length > 0 && (
+      {hasRemainingRecurring && (
         <div className="rounded-2xl border bg-card p-5 shadow-sm">
-          <p className="font-medium">Détail de la projection</p>
+          <p className="font-medium">Détail du reste à vivre</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Solde actuel <MoneyDisplay cents={totalBalance} currency={currency} size="sm" />
             {upcomingIncomeCents > 0 && (
@@ -339,7 +376,7 @@ export default async function DashboardPage() {
               </div>
               <div className="space-y-2">
                 {upcoming.map((r) => (
-                  <div key={r.id} className="flex items-center justify-between text-sm">
+                  <div key={`${r.id}-${r.occurrence_date}`} className="flex items-center justify-between text-sm">
                     <span className="truncate">{r.name}</span>
                     <MoneyDisplay cents={r.type === "expense" ? -r.amount_cents : r.amount_cents} signed size="sm" />
                   </div>

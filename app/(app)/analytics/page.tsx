@@ -3,6 +3,9 @@ import { fr } from "date-fns/locale";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/data/categories";
 import { getTransactionsInRange } from "@/lib/data/transactions";
+import { getAccounts } from "@/lib/data/accounts";
+import { getProfile } from "@/lib/data/profile";
+import { getSelectedAccountId, resolveSelectedAccountId } from "@/lib/data/account-filter";
 import { computePeriodTotals, percentChange } from "@/lib/calculations/budget";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
@@ -23,8 +26,22 @@ export default async function AnalyticsPage() {
   const iso = (d: Date) => format(d, "yyyy-MM-dd");
 
   const months = Array.from({ length: 6 }).map((_, i) => subMonths(now, 5 - i));
+  const profile = await getProfile(supabase, user.id);
+  const accounts = await getAccounts(supabase, user.id);
+  const selectedAccountId = resolveSelectedAccountId(
+    await getSelectedAccountId(profile?.default_account_id),
+    accounts
+  );
   const monthlyTx = await Promise.all(
-    months.map((m) => getTransactionsInRange(supabase, user.id, iso(startOfMonth(m)), iso(endOfMonth(m))))
+    months.map((m) =>
+      getTransactionsInRange(
+        supabase,
+        user.id,
+        iso(startOfMonth(m)),
+        iso(endOfMonth(m)),
+        selectedAccountId ?? undefined
+      )
+    )
   );
 
   const categories = await getCategories(supabase, user.id);

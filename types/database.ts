@@ -29,6 +29,7 @@ export interface Profile {
   timezone: string;
   onboarding_completed: boolean;
   monthly_budget_cents: number | null;
+  default_account_id: string | null;
   created_at: string;
   updated_at: string;
 }

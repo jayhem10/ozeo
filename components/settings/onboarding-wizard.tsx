@@ -36,7 +36,7 @@ export function OnboardingWizard() {
     OnboardingValues
   >({
     resolver: zodResolver(onboardingSchema),
-    defaultValues: { currency: "EUR", account_name: "Compte courant", monthly_budget: undefined },
+    defaultValues: { currency: "EUR", account_name: "Compte courant", initial_balance: 0, monthly_budget: undefined },
   });
 
   function next() {
@@ -111,6 +111,13 @@ export function OnboardingWizard() {
             <div className="space-y-1.5">
               <Label htmlFor="account_name">Nom du compte</Label>
               <Input id="account_name" {...register("account_name")} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="initial_balance">Solde actuel de ce compte</Label>
+              <Input id="initial_balance" type="number" step="0.01" placeholder="1000" {...register("initial_balance")} />
+              <p className="text-xs text-muted-foreground">
+                Le montant réellement disponible aujourd&apos;hui sur ce compte.
+              </p>
             </div>
             <Button onClick={next} className="w-full">
               Continuer

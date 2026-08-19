@@ -4,6 +4,7 @@ import { getOrCreateProfile } from "@/lib/data/profile";
 import { getAccounts } from "@/lib/data/accounts";
 import { getCategories } from "@/lib/data/categories";
 import { getSavingsGoals } from "@/lib/data/goals";
+import { getSelectedAccountId, resolveSelectedAccountId } from "@/lib/data/account-filter";
 import { AppShell } from "@/components/layout/app-shell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -29,9 +30,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     getCategories(supabase, user.id),
     getSavingsGoals(supabase, user.id),
   ]);
+  const selectedAccountId = resolveSelectedAccountId(
+    await getSelectedAccountId(profile.default_account_id),
+    accounts
+  );
 
   return (
-    <AppShell profile={profile} accounts={accounts} categories={categories} goals={goals}>
+    <AppShell
+      profile={profile}
+      accounts={accounts}
+      categories={categories}
+      goals={goals}
+      selectedAccountId={selectedAccountId}
+    >
       {children}
     </AppShell>
   );

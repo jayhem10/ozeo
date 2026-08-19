@@ -1,27 +1,7 @@
-import { addDays, addMonths, addYears, format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { RecurringTransaction } from "@/types/database";
-
-// Safety cap on how many missed occurrences we catch up per template in a
-// single run (e.g. if the cron didn't run for a while).
-const MAX_CATCH_UP_OCCURRENCES = 24;
-
-function nextOccurrenceAfter(
-  current: Date,
-  recurring: Pick<RecurringTransaction, "frequency" | "interval_days">
-): Date {
-  switch (recurring.frequency) {
-    case "weekly":
-      return addDays(current, 7);
-    case "yearly":
-      return addYears(current, 1);
-    case "custom":
-      return addDays(current, recurring.interval_days ?? 30);
-    case "monthly":
-    default:
-      return addMonths(current, 1);
-  }
-}
+import { materializeDueOccurrences } from "@/lib/recurring/materialize";
 
 export interface RecurringGenerationResult {
   scanned: number;
@@ -48,31 +28,12 @@ export async function runRecurringGenerationJob(): Promise<RecurringGenerationRe
 
   for (const r of (recurring ?? []) as RecurringTransaction[]) {
     try {
-      let occurrence = r.next_occurrence;
-      let iterations = 0;
-
-      while (occurrence <= today && iterations < MAX_CATCH_UP_OCCURRENCES) {
-        const { error: insertError } = await supabase.from("transactions").insert({
-          user_id: r.user_id,
-          account_id: r.account_id,
-          category_id: r.category_id,
-          type: r.type,
-          amount_cents: r.amount_cents,
-          description: r.name,
-          transaction_date: occurrence,
-          is_recurring: true,
-          recurring_transaction_id: r.id,
-        });
-        if (insertError) throw insertError;
-
-        result.created++;
-        occurrence = format(nextOccurrenceAfter(parseISO(occurrence), r), "yyyy-MM-dd");
-        iterations++;
-      }
+      const { created, nextOccurrence } = await materializeDueOccurrences(supabase, r);
+      result.created += created;
 
       const { error: updateError } = await supabase
         .from("recurring_transactions")
-        .update({ next_occurrence: occurrence })
+        .update({ next_occurrence: nextOccurrence })
         .eq("id", r.id);
       if (updateError) throw updateError;
     } catch (err) {

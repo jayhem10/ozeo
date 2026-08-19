@@ -97,12 +97,14 @@ export const profileFormSchema = z.object({
   locale: z.string().min(2),
   timezone: z.string().min(1),
   monthly_budget: z.coerce.number().nonnegative().nullable().optional(),
+  default_account_id: z.string().uuid().nullable().optional(),
 });
 export type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export const onboardingSchema = z.object({
   currency: z.string().length(3).default("EUR"),
   account_name: z.string().min(1).max(60).default("Compte courant"),
+  initial_balance: z.coerce.number().default(0),
   monthly_budget: z.coerce.number().nonnegative().optional(),
 });
 export type OnboardingValues = z.infer<typeof onboardingSchema>;

@@ -4,6 +4,9 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getCategories } from "@/lib/data/categories";
 import { getBudgets } from "@/lib/data/budgets";
 import { getTransactionsInRange } from "@/lib/data/transactions";
+import { getAccounts } from "@/lib/data/accounts";
+import { getProfile } from "@/lib/data/profile";
+import { getSelectedAccountId, resolveSelectedAccountId } from "@/lib/data/account-filter";
 import { computeBudgetProgress, computeDailyAllowance, getMonthRange } from "@/lib/calculations/budget";
 import { PageHeader } from "@/components/shared/page-header";
 import { StatCard } from "@/components/shared/stat-card";
@@ -25,10 +28,17 @@ export default async function BudgetsPage() {
   const { start, end } = getMonthRange(now);
   const iso = (d: Date) => format(d, "yyyy-MM-dd");
 
+  const profile = await getProfile(supabase, user.id);
+  const accounts = await getAccounts(supabase, user.id);
+  const selectedAccountId = resolveSelectedAccountId(
+    await getSelectedAccountId(profile?.default_account_id),
+    accounts
+  );
+
   const [categories, budgets, transactions] = await Promise.all([
     getCategories(supabase, user.id),
     getBudgets(supabase, user.id),
-    getTransactionsInRange(supabase, user.id, iso(start), iso(end)),
+    getTransactionsInRange(supabase, user.id, iso(start), iso(end), selectedAccountId ?? undefined),
   ]);
 
   const expenseCategories = categories.filter((c) => c.type === "expense");
