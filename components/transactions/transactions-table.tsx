@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { CategoryBadge } from "@/components/shared/category-badge";
@@ -27,6 +28,7 @@ import { MoneyDisplay } from "@/components/shared/money-display";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { TransactionForm } from "@/components/transactions/transaction-form";
+import { useIsMobile } from "@/hooks/use-media-query";
 import { updateTransaction, deleteTransaction, duplicateTransaction } from "@/lib/actions/transactions";
 import { fromCents } from "@/lib/money";
 import { Receipt, Target } from "lucide-react";
@@ -50,6 +52,7 @@ export function TransactionsTable({
   goals?: SavingsGoal[];
 }) {
   const [editing, setEditing] = useState<TxWithRelations | null>(null);
+  const isMobile = useIsMobile();
 
   if (transactions.length === 0) {
     return <EmptyState icon={Receipt} title="Aucune transaction" description="Ajuste tes filtres ou ajoute une dépense." />;
@@ -149,12 +152,9 @@ export function TransactionsTable({
         ))}
       </div>
 
-      <Dialog open={!!editing} onOpenChange={(open) => !open && setEditing(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Modifier la transaction</DialogTitle>
-          </DialogHeader>
-          {editing && (
+      {editing &&
+        (() => {
+          const form = (
             <TransactionForm
               accounts={accounts}
               categories={categories}
@@ -182,9 +182,32 @@ export function TransactionsTable({
               }}
               onCancel={() => setEditing(null)}
             />
-          )}
-        </DialogContent>
-      </Dialog>
+          );
+
+          if (isMobile) {
+            return (
+              <Drawer open onOpenChange={(open) => !open && setEditing(null)}>
+                <DrawerContent className="flex flex-col">
+                  <DrawerHeader>
+                    <DrawerTitle>Modifier la transaction</DrawerTitle>
+                  </DrawerHeader>
+                  <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">{form}</div>
+                </DrawerContent>
+              </Drawer>
+            );
+          }
+
+          return (
+            <Dialog open onOpenChange={(open) => !open && setEditing(null)}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Modifier la transaction</DialogTitle>
+                </DialogHeader>
+                {form}
+              </DialogContent>
+            </Dialog>
+          );
+        })()}
     </>
   );
 }

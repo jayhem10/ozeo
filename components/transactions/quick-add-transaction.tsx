@@ -86,11 +86,11 @@ export function QuickAddTransaction({
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent>
+        <DrawerContent className="flex flex-col">
           <DrawerHeader>
             <DrawerTitle>Nouvelle transaction</DrawerTitle>
           </DrawerHeader>
-          <div className="px-4 pb-6">{form}</div>
+          <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">{form}</div>
         </DrawerContent>
       </Drawer>
     );

@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { CategoryBadge } from "@/components/shared/category-badge";
 import { budgetFormSchema, type BudgetFormValues } from "@/lib/validations/schemas";
 import { upsertBudget } from "@/lib/actions/budgets";
@@ -50,30 +50,32 @@ export function BudgetFormDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={trigger} />
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Budget mensuel</DialogTitle>
-        </DialogHeader>
-        <div className="flex items-center gap-2 pb-2">
-          <CategoryBadge category={category} />
-        </div>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={setOpen}
+      title="Budget mensuel"
+      trigger={{ render: trigger }}
+    >
+      <div className="flex items-center gap-2 pb-2">
+        <CategoryBadge category={category} />
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+        <div className="-mx-1 flex-1 space-y-4 overflow-y-auto px-1 py-1">
           <input type="hidden" {...register("category_id")} />
           <div className="space-y-1.5">
             <Label htmlFor="amount">Montant mensuel</Label>
             <Input id="amount" type="number" step="0.01" autoFocus {...register("amount")} />
             {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-              Enregistrer
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+
+        <div className="flex justify-end gap-2 border-t pt-3 mt-3">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+            Enregistrer
+          </Button>
+        </div>
+      </form>
+    </ResponsiveDialog>
   );
 }

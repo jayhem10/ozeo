@@ -9,7 +9,7 @@ import { Loader2, Plus, Search, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { CategoryBadge } from "@/components/shared/category-badge";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { cn } from "@/lib/utils";
@@ -103,16 +103,23 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
     <div className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm">
       <div className="flex items-center justify-between">
         <p className="font-medium">Catégories</p>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger render={<Button size="sm" variant="outline" className="gap-1.5" />}>
-            <Plus className="size-4" />
-            Nouvelle
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-xs">
-            <DialogHeader>
-              <DialogTitle>Nouvelle catégorie</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+        <ResponsiveDialog
+          open={open}
+          onOpenChange={setOpen}
+          title="Nouvelle catégorie"
+          contentClassName="sm:max-w-xs"
+          trigger={{
+            render: <Button size="sm" variant="outline" className="gap-1.5" />,
+            children: (
+              <>
+                <Plus className="size-4" />
+                Nouvelle
+              </>
+            ),
+          }}
+        >
+          <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+            <div className="-mx-1 flex-1 space-y-3 overflow-y-auto px-1 py-1">
               <div className="space-y-1.5">
                 <Label htmlFor="name">Nom</Label>
                 <Input id="name" {...register("name")} />
@@ -124,7 +131,7 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
                     key={t}
                     type="button"
                     onClick={() => setValue("type", t)}
-                    className={`rounded-lg border px-3 py-2 text-sm font-medium ${
+                    className={`h-11 rounded-lg border text-sm font-medium ${
                       watch("type") === t ? "border-primary bg-primary/10 text-primary" : "text-muted-foreground"
                     }`}
                   >
@@ -136,13 +143,15 @@ export function CategoryManager({ categories }: { categories: Category[] }) {
                 <Label htmlFor="color">Couleur</Label>
                 <Input id="color" type="color" className="h-10 w-full p-1" {...register("color")} />
               </div>
+            </div>
+            <div className="flex justify-end gap-2 border-t pt-3 mt-3">
               <Button type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
                 Créer
               </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+            </div>
+          </form>
+        </ResponsiveDialog>
       </div>
 
       <div className="relative">

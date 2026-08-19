@@ -9,7 +9,7 @@ import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { goalFormSchema, type GoalFormValues } from "@/lib/validations/schemas";
 import { createGoal, updateGoal } from "@/lib/actions/goals";
 import type { SavingsGoal } from "@/types/database";
@@ -56,26 +56,32 @@ export function GoalFormDialog({ goal }: { goal?: SavingsGoal }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {goal ? (
-        <DialogTrigger render={<Button variant="ghost" size="sm" />}>Modifier</DialogTrigger>
-      ) : (
-        <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
-          <Plus className="size-4" />
-          Nouvel objectif
-        </DialogTrigger>
-      )}
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{goal ? "Modifier l'objectif" : "Nouvel objectif d'épargne"}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={setOpen}
+      title={goal ? "Modifier l'objectif" : "Nouvel objectif d'épargne"}
+      trigger={
+        goal
+          ? { render: <Button variant="ghost" size="sm" />, children: "Modifier" }
+          : {
+              render: <Button size="sm" className="gap-1.5" />,
+              children: (
+                <>
+                  <Plus className="size-4" />
+                  Nouvel objectif
+                </>
+              ),
+            }
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+        <div className="-mx-1 flex-1 space-y-4 overflow-y-auto px-1 py-1">
           <div className="space-y-1.5">
             <Label htmlFor="name">Nom</Label>
             <Input id="name" placeholder="Voyage au Japon" {...register("name")} />
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="target_amount">Objectif</Label>
               <Input id="target_amount" type="number" step="0.01" {...register("target_amount")} />
@@ -90,7 +96,7 @@ export function GoalFormDialog({ goal }: { goal?: SavingsGoal }) {
               </div>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="monthly_contribution">Contribution / mois</Label>
               <Input id="monthly_contribution" type="number" step="0.01" {...register("monthly_contribution")} />
@@ -100,14 +106,15 @@ export function GoalFormDialog({ goal }: { goal?: SavingsGoal }) {
               <Input id="target_date" type="date" {...register("target_date")} />
             </div>
           </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {goal ? "Enregistrer" : "Créer"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+
+        <div className="flex justify-end gap-2 border-t pt-3 mt-3">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {goal ? "Enregistrer" : "Créer"}
+          </Button>
+        </div>
+      </form>
+    </ResponsiveDialog>
   );
 }

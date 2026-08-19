@@ -16,13 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { ResponsiveDialog } from "@/components/shared/responsive-dialog";
 import { accountFormSchema, type AccountFormValues } from "@/lib/validations/schemas";
 import { createAccount, updateAccount } from "@/lib/actions/accounts";
 import type { Account } from "@/types/database";
@@ -69,20 +63,26 @@ export function AccountFormDialog({ account }: { account?: Account }) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {account ? (
-        <DialogTrigger render={<Button variant="ghost" size="sm" />}>Modifier</DialogTrigger>
-      ) : (
-        <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
-          <Plus className="size-4" />
-          Nouveau compte
-        </DialogTrigger>
-      )}
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{account ? "Modifier le compte" : "Nouveau compte"}</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <ResponsiveDialog
+      open={open}
+      onOpenChange={setOpen}
+      title={account ? "Modifier le compte" : "Nouveau compte"}
+      trigger={
+        account
+          ? { render: <Button variant="ghost" size="sm" />, children: "Modifier" }
+          : {
+              render: <Button size="sm" className="gap-1.5" />,
+              children: (
+                <>
+                  <Plus className="size-4" />
+                  Nouveau compte
+                </>
+              ),
+            }
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+        <div className="-mx-1 flex-1 space-y-4 overflow-y-auto px-1 py-1">
           <div className="space-y-1.5">
             <Label htmlFor="name">Nom</Label>
             <Input id="name" placeholder="Compte courant" {...register("name")} />
@@ -111,15 +111,15 @@ export function AccountFormDialog({ account }: { account?: Account }) {
               <Input id="initial_balance" type="number" step="0.01" {...register("initial_balance")} />
             </div>
           )}
+        </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {account ? "Enregistrer" : "Créer"}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <div className="flex justify-end gap-2 border-t pt-3 mt-3">
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {account ? "Enregistrer" : "Créer"}
+          </Button>
+        </div>
+      </form>
+    </ResponsiveDialog>
   );
 }
