@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runRecurringGenerationJob } from "@/lib/recurring/generate";
+import { runAccountBalanceRecalcJob } from "@/lib/accounts/recalc-balances";
 
 // Triggered daily by Vercel Cron (see vercel.json). Vercel injects the
 // Authorization header automatically when CRON_SECRET is set on the project.
@@ -15,5 +16,6 @@ export async function GET(request: Request) {
   }
 
   const result = await runRecurringGenerationJob();
+  await runAccountBalanceRecalcJob();
   return NextResponse.json(result);
 }
