@@ -39,7 +39,7 @@ export function ResponsiveDialog({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer open={open} onOpenChange={onOpenChange} showSwipeHandle>
         {trigger && <DrawerTrigger render={trigger.render}>{trigger.children}</DrawerTrigger>}
         <DrawerContent className="flex flex-col">
           <DrawerHeader>

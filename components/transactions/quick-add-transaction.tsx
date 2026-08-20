@@ -85,7 +85,7 @@ export function QuickAddTransaction({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
+      <Drawer open={open} onOpenChange={onOpenChange} showSwipeHandle>
         <DrawerContent className="flex flex-col">
           <DrawerHeader>
             <DrawerTitle>Nouvelle transaction</DrawerTitle>

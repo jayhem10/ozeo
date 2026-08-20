@@ -64,7 +64,7 @@ export function BudgetFormDialog({
           <input type="hidden" {...register("category_id")} />
           <div className="space-y-1.5">
             <Label htmlFor="amount">Montant mensuel</Label>
-            <Input id="amount" type="number" step="0.01" autoFocus {...register("amount")} />
+            <Input id="amount" type="number" step="0.01" {...register("amount")} />
             {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
           </div>
         </div>

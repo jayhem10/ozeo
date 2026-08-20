@@ -122,7 +122,6 @@ export function TransactionForm({
             type="number"
             step="0.01"
             inputMode="decimal"
-            autoFocus
             placeholder="0,00 €"
             className="h-14 text-center text-2xl font-semibold"
             aria-invalid={!!errors.amount}

@@ -186,7 +186,7 @@ export function TransactionsTable({
 
           if (isMobile) {
             return (
-              <Drawer open onOpenChange={(open) => !open && setEditing(null)}>
+              <Drawer open onOpenChange={(open) => !open && setEditing(null)} showSwipeHandle>
                 <DrawerContent className="flex flex-col">
                   <DrawerHeader>
                     <DrawerTitle>Modifier la transaction</DrawerTitle>

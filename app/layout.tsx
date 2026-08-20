@@ -27,6 +27,9 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
   ],
+  // Makes iOS/Android actually shrink the layout viewport when the keyboard opens
+  // instead of just overlaying it — fixes dvh-based drawers jumping/hiding behind the keyboard.
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

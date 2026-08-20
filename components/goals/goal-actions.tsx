@@ -57,7 +57,7 @@ export function GoalActions({ goalId, goalName }: { goalId: string; goalName: st
           <div className="-mx-1 flex-1 space-y-3 overflow-y-auto px-1 py-1">
             <div className="space-y-1.5">
               <Label htmlFor="amount">Montant</Label>
-              <Input id="amount" type="number" step="0.01" autoFocus {...register("amount")} />
+              <Input id="amount" type="number" step="0.01" {...register("amount")} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="note">Note (optionnel)</Label>
