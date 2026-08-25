@@ -70,6 +70,9 @@ export const recurringFormSchema = z.object({
   type: z.enum(["expense", "income"]),
   frequency: recurringFrequencySchema,
   next_occurrence: z.string().min(1, "Date requise"),
+  total_occurrences: z
+    .preprocess((v) => (v === "" || v === undefined ? null : v), z.coerce.number().int().positive().nullable())
+    .default(null),
   active: z.boolean().default(true),
 });
 export type RecurringFormValues = z.infer<typeof recurringFormSchema>;

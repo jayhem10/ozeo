@@ -60,8 +60,10 @@ export async function getRecurringOccurrencesThrough(
     const occurrences: RecurringOccurrence[] = [];
     let occurrence = parseISO(recurring.next_occurrence);
     let iterations = 0;
+    const remaining =
+      recurring.total_occurrences !== null ? recurring.total_occurrences - recurring.occurrences_count : Infinity;
 
-    while (format(occurrence, "yyyy-MM-dd") <= throughDate && iterations < 1200) {
+    while (format(occurrence, "yyyy-MM-dd") <= throughDate && iterations < 1200 && iterations < remaining) {
       occurrences.push({ ...recurring, occurrence_date: format(occurrence, "yyyy-MM-dd") });
       occurrence = nextOccurrenceAfter(occurrence, recurring);
       iterations++;

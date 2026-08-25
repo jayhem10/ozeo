@@ -41,6 +41,7 @@ export async function createRecurring(values: RecurringFormValues): Promise<Acti
       type: v.type,
       frequency: v.frequency,
       next_occurrence: v.next_occurrence,
+      total_occurrences: v.total_occurrences,
       active: v.active,
     })
     .select("id")
@@ -49,7 +50,7 @@ export async function createRecurring(values: RecurringFormValues): Promise<Acti
   if (error) return { success: false, error: error.message };
 
   if (v.active) {
-    const { nextOccurrence } = await materializeDueOccurrences(supabase, {
+    const { nextOccurrence, occurrencesCount, completed } = await materializeDueOccurrences(supabase, {
       id: inserted.id,
       user_id: user.id,
       account_id: v.account_id,
@@ -60,9 +61,14 @@ export async function createRecurring(values: RecurringFormValues): Promise<Acti
       frequency: v.frequency,
       interval_days: null,
       next_occurrence: v.next_occurrence,
+      total_occurrences: v.total_occurrences,
+      occurrences_count: 0,
     });
-    if (nextOccurrence !== v.next_occurrence) {
-      await supabase.from("recurring_transactions").update({ next_occurrence: nextOccurrence }).eq("id", inserted.id);
+    if (nextOccurrence !== v.next_occurrence || completed) {
+      await supabase
+        .from("recurring_transactions")
+        .update({ next_occurrence: nextOccurrence, occurrences_count: occurrencesCount, active: !completed })
+        .eq("id", inserted.id);
     }
   }
 
@@ -76,7 +82,7 @@ export async function updateRecurring(id: string, values: RecurringFormValues): 
   const { supabase, user } = await requireUser();
   const v = parsed.data;
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("recurring_transactions")
     .update({
       account_id: v.account_id,
@@ -86,15 +92,18 @@ export async function updateRecurring(id: string, values: RecurringFormValues): 
       type: v.type,
       frequency: v.frequency,
       next_occurrence: v.next_occurrence,
+      total_occurrences: v.total_occurrences,
       active: v.active,
     })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .select("occurrences_count")
+    .single();
 
   if (error) return { success: false, error: error.message };
 
   if (v.active) {
-    const { nextOccurrence } = await materializeDueOccurrences(supabase, {
+    const { nextOccurrence, occurrencesCount, completed } = await materializeDueOccurrences(supabase, {
       id,
       user_id: user.id,
       account_id: v.account_id,
@@ -105,9 +114,14 @@ export async function updateRecurring(id: string, values: RecurringFormValues): 
       frequency: v.frequency,
       interval_days: null,
       next_occurrence: v.next_occurrence,
+      total_occurrences: v.total_occurrences,
+      occurrences_count: updated.occurrences_count,
     });
-    if (nextOccurrence !== v.next_occurrence) {
-      await supabase.from("recurring_transactions").update({ next_occurrence: nextOccurrence }).eq("id", id);
+    if (nextOccurrence !== v.next_occurrence || completed) {
+      await supabase
+        .from("recurring_transactions")
+        .update({ next_occurrence: nextOccurrence, occurrences_count: occurrencesCount, active: !completed })
+        .eq("id", id);
     }
   }
 

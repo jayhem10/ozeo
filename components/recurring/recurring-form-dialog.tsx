@@ -48,6 +48,7 @@ export function RecurringFormDialog({
     type: "expense",
     frequency: "monthly",
     next_occurrence: format(new Date(), "yyyy-MM-dd"),
+    total_occurrences: null,
     active: true,
   };
   const {
@@ -68,6 +69,7 @@ export function RecurringFormDialog({
           type: recurring.type === "transfer" ? "expense" : recurring.type,
           frequency: recurring.frequency,
           next_occurrence: recurring.next_occurrence,
+          total_occurrences: recurring.total_occurrences,
           active: recurring.active,
         }
       : emptyDefaults,
@@ -212,6 +214,24 @@ export function RecurringFormDialog({
                 <Label htmlFor="next_occurrence">Prochaine échéance</Label>
                 <Input id="next_occurrence" type="date" {...register("next_occurrence")} />
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="total_occurrences">Nombre de paiements (optionnel)</Label>
+              <Input
+                id="total_occurrences"
+                type="number"
+                min={1}
+                placeholder="Illimité"
+                {...register("total_occurrences")}
+              />
+              <p className="text-xs text-muted-foreground">
+                Pour un paiement en plusieurs fois (ex: 3x), la récurrence s&apos;arrête automatiquement une fois ce
+                nombre atteint.
+              </p>
+              {errors.total_occurrences && (
+                <p className="text-xs text-destructive">{errors.total_occurrences.message}</p>
+              )}
             </div>
           </div>
 

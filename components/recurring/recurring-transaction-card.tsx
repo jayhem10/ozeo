@@ -32,12 +32,18 @@ export function RecurringTransactionCard({
         </div>
         <div className="shrink-0 text-right">
           <MoneyDisplay cents={signedCents} signed className="font-semibold" />
-          <p className="text-xs text-muted-foreground">{FREQUENCY_LABEL[recurring.frequency]}</p>
+          <p className="text-xs text-muted-foreground">
+            {recurring.total_occurrences
+              ? `${recurring.occurrences_count}/${recurring.total_occurrences} paiements`
+              : FREQUENCY_LABEL[recurring.frequency]}
+          </p>
         </div>
       </div>
       <div className="flex items-center justify-between gap-2 border-t pt-3">
         <p className="truncate text-xs text-muted-foreground">
-          Prochaine échéance : {format(new Date(recurring.next_occurrence), "d MMM yyyy", { locale: fr })}
+          {recurring.total_occurrences && recurring.occurrences_count >= recurring.total_occurrences
+            ? "Termin\u00e9"
+            : `Prochaine échéance : ${format(new Date(recurring.next_occurrence), "d MMM yyyy", { locale: fr })}`}
         </p>
         <div className="flex shrink-0 items-center gap-1">{children}</div>
       </div>

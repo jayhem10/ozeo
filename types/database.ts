@@ -109,6 +109,8 @@ export interface RecurringTransaction {
   frequency: RecurringFrequency;
   interval_days: number | null;
   next_occurrence: string;
+  total_occurrences: number | null;
+  occurrences_count: number;
   active: boolean;
   created_at: string;
   updated_at: string;

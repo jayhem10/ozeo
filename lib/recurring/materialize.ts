@@ -10,6 +10,8 @@ const MAX_CATCH_UP_OCCURRENCES = 24;
 export interface MaterializeResult {
   created: number;
   nextOccurrence: string;
+  occurrencesCount: number;
+  completed: boolean;
 }
 
 /**
@@ -22,15 +24,32 @@ export async function materializeDueOccurrences(
   supabase: SupabaseClient,
   recurring: Pick<
     RecurringTransaction,
-    "id" | "user_id" | "account_id" | "category_id" | "type" | "amount_cents" | "name" | "frequency" | "interval_days" | "next_occurrence"
+    | "id"
+    | "user_id"
+    | "account_id"
+    | "category_id"
+    | "type"
+    | "amount_cents"
+    | "name"
+    | "frequency"
+    | "interval_days"
+    | "next_occurrence"
+    | "total_occurrences"
+    | "occurrences_count"
   >
 ): Promise<MaterializeResult> {
   const today = format(new Date(), "yyyy-MM-dd");
   let occurrence = recurring.next_occurrence;
   let created = 0;
   let iterations = 0;
+  // Cap iterations to whatever installments remain so a limited recurrence
+  // (e.g. "3x100€") stops materializing once it's fully paid off.
+  const remaining =
+    recurring.total_occurrences !== null
+      ? recurring.total_occurrences - recurring.occurrences_count
+      : Infinity;
 
-  while (occurrence <= today && iterations < MAX_CATCH_UP_OCCURRENCES) {
+  while (occurrence <= today && iterations < MAX_CATCH_UP_OCCURRENCES && iterations < remaining) {
     // Upsert + ignoreDuplicates makes this idempotent: re-editing a recurring
     // template's date or re-toggling it active won't create duplicate
     // transactions for an occurrence that was already materialized.
@@ -58,5 +77,8 @@ export async function materializeDueOccurrences(
     iterations++;
   }
 
-  return { created, nextOccurrence: occurrence };
+  const occurrencesCount = recurring.occurrences_count + iterations;
+  const completed = recurring.total_occurrences !== null && occurrencesCount >= recurring.total_occurrences;
+
+  return { created, nextOccurrence: occurrence, occurrencesCount, completed };
 }

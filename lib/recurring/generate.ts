@@ -28,12 +28,12 @@ export async function runRecurringGenerationJob(): Promise<RecurringGenerationRe
 
   for (const r of (recurring ?? []) as RecurringTransaction[]) {
     try {
-      const { created, nextOccurrence } = await materializeDueOccurrences(supabase, r);
+      const { created, nextOccurrence, occurrencesCount, completed } = await materializeDueOccurrences(supabase, r);
       result.created += created;
 
       const { error: updateError } = await supabase
         .from("recurring_transactions")
-        .update({ next_occurrence: nextOccurrence })
+        .update({ next_occurrence: nextOccurrence, occurrences_count: occurrencesCount, active: !completed })
         .eq("id", r.id);
       if (updateError) throw updateError;
     } catch (err) {
