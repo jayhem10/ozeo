@@ -105,12 +105,16 @@ export function AccountFormDialog({ account }: { account?: Account }) {
             </Select>
           </div>
 
-          {!account && (
-            <div className="space-y-1.5">
-              <Label htmlFor="initial_balance">Solde initial</Label>
-              <Input id="initial_balance" type="number" step="0.01" {...register("initial_balance")} />
-            </div>
-          )}
+          <div className="space-y-1.5">
+            <Label htmlFor="initial_balance">Solde initial</Label>
+            <Input id="initial_balance" type="number" step="0.01" {...register("initial_balance")} />
+            {account && (
+              <p className="text-xs text-muted-foreground">
+                Corrige ce montant si ton solde de départ n&apos;était pas exact : le solde actuel du compte sera
+                ajusté du même écart, sans toucher à tes transactions.
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 border-t pt-3 mt-3">

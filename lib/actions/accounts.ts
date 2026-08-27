@@ -44,9 +44,30 @@ export async function updateAccount(id: string, values: AccountFormValues): Prom
   const { supabase, user } = await requireUser();
   const v = parsed.data;
 
+  const { data: existing, error: fetchError } = await supabase
+    .from("accounts")
+    .select("initial_balance_cents, current_balance_cents")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single();
+  if (fetchError) return { success: false, error: fetchError.message };
+
+  // Shifting both by the same delta keeps current = initial + sum(transactions)
+  // consistent, so correcting drift never touches past transactions.
+  const newInitialCents = toCents(v.initial_balance);
+  const deltaCents = newInitialCents - existing.initial_balance_cents;
+
   const { error } = await supabase
     .from("accounts")
-    .update({ name: v.name, type: v.type, currency: v.currency, icon: v.icon, color: v.color })
+    .update({
+      name: v.name,
+      type: v.type,
+      currency: v.currency,
+      icon: v.icon,
+      color: v.color,
+      initial_balance_cents: newInitialCents,
+      current_balance_cents: existing.current_balance_cents + deltaCents,
+    })
     .eq("id", id)
     .eq("user_id", user.id);
 
