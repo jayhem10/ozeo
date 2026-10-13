@@ -61,7 +61,7 @@ export default async function DashboardPage() {
     getTransactionsInRange(supabase, user.id, iso(monthStart), iso(monthEnd), selectedAccountId ?? undefined),
     getTransactionsInRange(supabase, user.id, iso(prevStart), iso(prevEnd), selectedAccountId ?? undefined),
     getSavingsGoals(supabase, user.id),
-    getRecurringOccurrencesThrough(supabase, user.id, iso(monthEnd), selectedAccountId ?? undefined),
+    getRecurringOccurrencesThrough(supabase, user.id, iso(monthEnd), selectedAccountId ?? undefined, iso(now)),
   ]);
 
   const currency = profile?.currency ?? "EUR";

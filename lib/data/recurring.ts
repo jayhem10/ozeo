@@ -44,7 +44,8 @@ export async function getRecurringOccurrencesThrough(
   supabase: SupabaseClient,
   userId: string,
   throughDate: string,
-  accountId?: string
+  accountId?: string,
+  fromDate?: string
 ): Promise<RecurringOccurrence[]> {
   let query = supabase
     .from("recurring_transactions")
@@ -64,7 +65,11 @@ export async function getRecurringOccurrencesThrough(
       recurring.total_occurrences !== null ? recurring.total_occurrences - recurring.occurrences_count : Infinity;
 
     while (format(occurrence, "yyyy-MM-dd") <= throughDate && iterations < 1200 && iterations < remaining) {
-      occurrences.push({ ...recurring, occurrence_date: format(occurrence, "yyyy-MM-dd") });
+      const occurrenceDate = format(occurrence, "yyyy-MM-dd");
+      // Overdue occurrences (stale next_occurrence) are not "upcoming".
+      if (!fromDate || occurrenceDate >= fromDate) {
+        occurrences.push({ ...recurring, occurrence_date: occurrenceDate });
+      }
       occurrence = nextOccurrenceAfter(occurrence, recurring);
       iterations++;
     }
